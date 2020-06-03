@@ -27,9 +27,6 @@ jacks = int(input ('Jacks: '))
 ## The hand patterns 5-4-2-2 (an example of a two-suiter) 
 ## and 6-3-2-2 (a single-suiter) are generally referred to as semi-balanced.
 
-truly_balanced = [(3,3,3,4), (2,3,4,4), (2,3,3,5)]
-semi_balanced = [(2,2,4,5),(2,2,3,6)]
-
 balanced_hands = { 
 	(3,3,3,4) : 'Truly',
 	(2,3,4,4) : 'Truly',
