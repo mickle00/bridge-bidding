@@ -21,6 +21,7 @@ class Hand:
 		self.face_cards = face_cards
 
 	## https://en.wikipedia.org/wiki/Bridge_Base_Basic#Opener_approximate_hand_strengths
+	## https://bridgevid.com/wp-content/uploads/2016/10/Flow-Charts.pdf
 	def get_opening_bid(self):
 		hcp = self.get_high_card_points()
 		if self.get_balance() is 'Drunk':
@@ -64,7 +65,7 @@ class Hand:
 		elif hcp > 21:
 			return 'Strong 2 Club Convention'
 		else:
-			return ''
+			return 'Unknown'
 
 
 	def get_balanced_opening_bid(self, hcp):
@@ -146,7 +147,7 @@ def main():
 
 	print ('vhat to do, vhat to do....')
 	print ('============================')
-	#print (hand.get_opening_bid())
+	print ('Opening Bid: ' + hand.get_opening_bid())
 
 if __name__ == '__main__':
     main()
