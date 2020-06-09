@@ -1,25 +1,5 @@
 #!/usr/bin/python3
 
-print ('Gathering Suit Info')
-print ('===================')
-
-clubs = int(input ('Clubs: '))
-diamonds = int(input ('Diamonds: '))
-hearts = int(input ('Hearts: '))
-spades = int(input ('Spades: '))
-
-sum = clubs + diamonds + hearts + spades
-if (sum is not 13):
-	print ('Wrong number of cards, asshole.')
-
-print ('\nGathering High Card Info')
-print ('============================')
-
-aces = int(input ('Aces: '))
-kings  = int(input ('Kings: '))
-queens = int(input ('Queens: '))
-jacks = int(input ('Jacks: '))
-
 ## In the game of contract bridge, a balanced hand (or balanced distribution) 
 ## denotes a hand of thirteen cards which contains no singleton or void and 
 ## at most one doubleton. 
@@ -35,84 +15,138 @@ balanced_hands = {
 	(2,2,3,6) : 'Semi'
 }
 
-def get_suits():
-	suits = [clubs, diamonds, hearts, spades]
-	suits.sort()
-	return suits
+class Hand:
+	def __init__(self, suits, face_cards):
+		self.suits = suits
+		self.face_cards = face_cards
 
-def get_balance():
-	suits = tuple(get_suits())
-	if suits in balanced_hands:
-		return (balanced_hands[suits])
-	else:
-		return ('Drunk')
+	## https://en.wikipedia.org/wiki/Bridge_Base_Basic#Opener_approximate_hand_strengths
+	def get_opening_bid(self):
+		hcp = self.get_high_card_points()
+		if self.get_balance() is 'Drunk':
+			return(self.get_unbalanced_opening_bid(hcp))
+		else:
+			return(self.get_balanced_opening_bid(hcp))
 
-def get_high_card_points():
-	return (
-		(4 * aces) 
-              + (3 * kings) 
-              + (2 * queens) 
-              + (1 * jacks)
-        )
+	def get_suit_counts(self):
+		suit_counts = [self.suits['clubs'], self.suits['diamonds'], self.suits['hearts'], self.suits['spades']]
+		suit_counts.sort()
+		return suit_counts
 
-def get_total_points():
-	extra_points = 0
-	for suit_count in get_suits():
-		if suit_count > 4:
-			extra_points += suit_count - 4
+	def get_balance(self):
+		suits = tuple(self.get_suit_counts())
+		if suits in balanced_hands:
+			return (balanced_hands[suits])
+		else:
+			return ('Drunk')
 
-	return get_high_card_points() + extra_points
+	def get_high_card_points(self):
+		return (
+			(4 * self.face_cards['aces'])
+		      + (3 * self.face_cards['kings'])
+		      + (2 * self.face_cards['queens'])
+		      + (1 * self.face_cards['jacks'])
+		)
 
-## https://en.wikipedia.org/wiki/Bridge_Base_Basic#Opener_approximate_hand_strengths
-def get_opening_bid():
-	hcp = get_high_card_points()
-	if get_balance() is 'Drunk':
-		get_unbalanced_opening_bid(hcp)
-	else:
-		get_balanced_opening_bid(hcp)
+	def get_total_points(self):
+		extra_points = 0
+		for suit_count in self.get_suit_counts():
+			if suit_count > 4:
+				extra_points += suit_count - 4
 
-## For unbalanced hands:
-## 
-## 0 - 12 points: Pass unless the hand is suitable for a preemptive opening bid.
-## 13 - 21 points: Hands of 13 points or more are strong enough to open with natural bidding, including:
-## minimum opening hands with 13-15 points
-## medium opening hands with 16-18 points
-## maximum opening hands with 19-21 points
-## For unbalanced hands with 22+ points: show a very strong opening hand by using the strong 2♣ convention.
+		return self.get_high_card_points() + extra_points
 
-def get_unbalanced_opening_bid(hcp):
-	print('Drunk Strategy')
-	if hcp <= 12:
-		print ('Pass')
-	elif hcp <= 21:
-		print ('wtf is natual bidding')
-	elif hcp > 21:
-		print ('Strong 2 Club Convention')
+	def get_unbalanced_opening_bid(self, hcp):
+		if hcp <= 12:
+			return 'Pass'
+		elif hcp <= 21:
+			return 'wtf is natual bidding'
+		elif hcp > 21:
+			return 'Strong 2 Club Convention'
+		else:
+			return ''
 
 
-## For balanced hands, open with a no-trump bid when you can limit your hand to the following point ranges:
-## 
-## 1NT = 15-17 HCP
-## 2NT = 20-21 HCP
-## 3NT = 25-27 HCP
-## For other balanced hands, you can still limit your points by opening in your longest suit and then using the no-trump bid on your second bid:
-## 
-## 13 - 14 HCP: bid 1 of a suit and then make a non-jump rebid in no trump (1NT)
-## 18 - 19 HCP: bid 1 of a suit and then make a jump rebid in no trump (2NT)
-## 22 - 24 HCP: bid 2♣ and then make a non-jump rebid in no trump (2NT)
-## 28 - 30 HCP: bid 2♣ and then make a jump rebid in no trump (3NT)
-## 31 - 32 HCP: bid 2♣ and then make a double-jump rebid in no trump (4NT)
+	def get_balanced_opening_bid(self, hcp):
+		if hcp <= 12:
+			return ('Pass')
 
-def get_balanced_opening_bid(hcp):
-	print ('TODO')
+		elif hcp >= 13 and hcp <= 14:
+			return ('bid 1 of a suit and then make a non-jump rebid in no trump (1NT)')
 
-print('\nCrunching Numbers')
-print ('============================')
-print ('Balance: ', get_balance())
-print ('HCP: ', get_high_card_points())
-print ('TP: ', get_total_points())
+		elif hcp >= 15 and hcp <= 17:
+			return ('1NT')
 
-print ('vhat to do, vhat to do....')
-print ('============================')
-print (get_opening_bid())
+		elif hcp >= 18 and hcp <= 19:
+			return('bid 1 of a suit and then make a jump rebid in no trump (2NT)')
 
+		elif hcp >= 20 and hcp <= 21:
+			return ('2NT')
+
+		elif hcp >= 22 and hcp <= 24:
+			return('bid 2♣ and then make a non-jump rebid in no trump (2NT)')
+
+		elif hcp >= 25 and hcp <= 27:
+			return ('3NT')
+
+		elif hcp >= 28 and hcp <= 30:
+			return('bid 2♣ and then make a jump rebid in no trump (3NT)')
+
+		elif hcp >= 31 and hcp <= 32:
+			return('bid 2♣ and then make a double-jump rebid in no trump (4NT)')
+
+		elif hcp > 21:
+			return ('Strong 2 Club Convention')
+
+		else:
+			return None
+
+def get_input():
+	print ('Gathering Suit Info')
+	print ('===================')
+
+	clubs = int(input ('Clubs: '))
+	diamonds = int(input ('Diamonds: '))
+	hearts = int(input ('Hearts: '))
+	spades = int(input ('Spades: '))
+
+	sum = clubs + diamonds + hearts + spades
+	if (sum is not 13):
+		print ('Wrong number of cards, asshole.')
+
+	suits = {}
+	suits['clubs'] = clubs
+	suits['diamonds'] = diamonds
+	suits['hearts'] = hearts
+	suits['spades'] = spades
+
+	print ('\nGathering High Card Info')
+	print ('============================')
+
+	aces = int(input ('Aces: '))
+	kings  = int(input ('Kings: '))
+	queens = int(input ('Queens: '))
+	jacks = int(input ('Jacks: '))
+
+	face_cards = {}
+	face_cards['aces'] = aces
+	face_cards['kings'] = kings
+	face_cards['queens'] = queens
+	face_cards['jacks'] = jacks
+
+	return Hand(suits, face_cards)
+
+def main():
+	hand = get_input()
+	print('\nCrunching Numbers')
+	print ('============================')
+	print ('Balance: ', hand.get_balance())
+	print ('HCP: ', hand.get_high_card_points())
+	print ('TP: ', hand.get_total_points())
+
+	print ('vhat to do, vhat to do....')
+	print ('============================')
+	#print (hand.get_opening_bid())
+
+if __name__ == '__main__':
+    main()
